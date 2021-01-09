@@ -6,7 +6,15 @@
 
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>kvit</ToolCommandName>
-    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageOutputPath>../../nupkg</PackageOutputPath>
+
+    <Authors>Mustafa Sadedil</Authors>
+    <Product>Kvit</Product>
+    <Copyright>Mustafa Sadedil</Copyright>
+    <Description>Syncs Key and Value pairs between Consul and file system</Description>
+    <PackageTags>consule keyvalue kv</PackageTags>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>

@@ -29,7 +29,7 @@ namespace Kvit.Commands
 
             Handler = CommandHandler.Create<Uri, string>(ExecuteAsync);
         }
-        
+
         private async Task ExecuteAsync(Uri address, string token)
         {
             var nonFolderPairs = await GetNonFolderPairsAsync(address, token);

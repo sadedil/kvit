@@ -4,6 +4,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kvit", "src\Kvit\Kvit.cspro
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D69DC59E-4DF8-4486-8FB5-BBC44137C7D9}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{55507049-0B62-479D-A0C1-DA459194C4EA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kvit.IntegrationTests", "test\Kvit.IntegrationTests\Kvit.IntegrationTests.csproj", "{63B990B6-9033-4611-81E2-CC967664D60A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,8 +18,13 @@ Global
 		{54F525A7-428E-43BC-B194-A8CFFA3E0089}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{54F525A7-428E-43BC-B194-A8CFFA3E0089}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{54F525A7-428E-43BC-B194-A8CFFA3E0089}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63B990B6-9033-4611-81E2-CC967664D60A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63B990B6-9033-4611-81E2-CC967664D60A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63B990B6-9033-4611-81E2-CC967664D60A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63B990B6-9033-4611-81E2-CC967664D60A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{54F525A7-428E-43BC-B194-A8CFFA3E0089} = {D69DC59E-4DF8-4486-8FB5-BBC44137C7D9}
+		{63B990B6-9033-4611-81E2-CC967664D60A} = {55507049-0B62-479D-A0C1-DA459194C4EA}
 	EndGlobalSection
 EndGlobal
