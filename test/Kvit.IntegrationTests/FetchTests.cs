@@ -9,7 +9,7 @@ namespace Kvit.IntegrationTests
     public class FetchTests
     {
         [Fact]
-        public async Task Kvit_Version_ShouldReturn_Semver_Result()
+        public void Kvit_Version_ShouldReturn_Semver_Result()
         {
             // Arrange & Act
             var (stdout, stderr) = ProcessHelper.RunKvit("--version");
@@ -19,7 +19,7 @@ namespace Kvit.IntegrationTests
         }
 
         [Fact]
-        public async Task Kvit_Help_ShouldReturn_UsageInfo()
+        public void Kvit_Help_ShouldReturn_UsageInfo()
         {
             // Arrange & Act
             var (stdout, stderr) = ProcessHelper.RunKvit("--help");
@@ -32,7 +32,7 @@ namespace Kvit.IntegrationTests
         }
 
         [Fact]
-        public async Task Kvit_WithoutArguments_ShouldShow_UsageInfo()
+        public void Kvit_WithoutArguments_ShouldShow_UsageInfo()
         {
             // Arrange & Act
             var (stdoutHelp, stderrHelp) = ProcessHelper.RunKvit("--help");
