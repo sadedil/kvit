@@ -18,13 +18,52 @@ jobs:
           - 8500:8500
 
     steps:
+
+    - run: sleep 5
+
     - name: Checkout
       uses: actions/checkout@v2
 
-    - name: CURL-ACTION
+    - name: CURL-ACTION1
       uses: enflo/curl-action@v1.2
       with:
         curl: http://localhost:8500
+      continue-on-error: true
+
+    - run: sleep 5
+
+
+    - name: CURL-ACTION2
+      uses: enflo/curl-action@v1.2
+      with:
+        curl: http://localhost:8500
+      continue-on-error: true
+
+    - run: sleep 5
+
+    - name: CURL-ACTION3
+      uses: enflo/curl-action@v1.2
+      with:
+        curl: http://localhost:8500
+      continue-on-error: true
+
+    - run: sleep 5
+
+    - name: CURL-ACTION4
+      uses: enflo/curl-action@v1.2
+      with:
+        curl: http://localhost:8500
+      continue-on-error: true
+
+
+    - run: sleep 5
+
+    - name: CURL-ACTION5
+      uses: enflo/curl-action@v1.2
+      with:
+        curl: http://localhost:8500
+      continue-on-error: true
+
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
