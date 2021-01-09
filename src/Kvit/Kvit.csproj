@@ -6,7 +6,7 @@
 
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>kvit</ToolCommandName>
-    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <PackageOutputPath>../../nupkg</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
