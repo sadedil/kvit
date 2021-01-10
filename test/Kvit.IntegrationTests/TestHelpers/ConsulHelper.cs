@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 
-namespace Kvit.IntegrationTests
+namespace Kvit.IntegrationTests.TestHelpers
 {
     internal static class ConsulHelper
     {
