@@ -13,7 +13,6 @@ namespace Kvit
                 Description = "Kvit syncs your Consul KV values with file system",
             };
 
-            rootCommand.AddCommand(new InitCommand());
             rootCommand.AddCommand(new FetchCommand());
             rootCommand.AddCommand(new PushCommand());
 
