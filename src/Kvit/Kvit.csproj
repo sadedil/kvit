@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>kvit</AssemblyName>
 
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>kvit</ToolCommandName>
@@ -12,7 +13,10 @@
     <Product>Kvit</Product>
     <Copyright>Mustafa Sadedil</Copyright>
     <Description>Syncs Key and Value pairs between Consul and file system</Description>
-    <PackageTags>consule keyvalue kv</PackageTags>
+    <PackageTags>consul;keyvalue;kv;</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageProjectUrl>https://github.com/sadedil/kvit</PackageProjectUrl>
+
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
