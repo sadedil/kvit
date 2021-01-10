@@ -12,12 +12,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [ubuntu-latest, windows-latest]
 
     services:
       consul:
         image: consul
-        # Kvit.IntegrationTests needs 8900
+        # Kvit.IntegrationTests needs to a running Consul on 8900
         ports:
           - 8900:8500
 
@@ -43,9 +43,9 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
     - name: Pack
-      if: ${{ github.event_name != 'pull_request' }}
+      if: ${{ github.event_name != 'pull_request' && matrix.os == 'ubuntu-latest' }}
       run: dotnet pack --verbosity normal --configuration Release
 
     - name: Push
-      if: ${{ github.event_name != 'pull_request' }}
+      if: ${{ github.event_name != 'pull_request' && matrix.os == 'ubuntu-latest' }}
       run: dotnet nuget push nupkg/*.nupkg -s https://www.nuget.org/ -k ${{ secrets.nuget_api_key }}
