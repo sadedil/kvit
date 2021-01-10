@@ -8,6 +8,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{55507049-0
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kvit.IntegrationTests", "test\Kvit.IntegrationTests\Kvit.IntegrationTests.csproj", "{63B990B6-9033-4611-81E2-CC967664D60A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "other", "other", "{963FF11D-8869-4AF9-88C6-AA3B9B089601}"
+ProjectSection(SolutionItems) = preProject
+	version.json = version.json
+	.gitignore = .gitignore
+	README.md = README.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflow", "workflow", "{7714FFC9-7823-4536-B663-367C5619F0A7}"
+ProjectSection(SolutionItems) = preProject
+	.github\workflows\test-and-pack.yml = .github\workflows\test-and-pack.yml
+EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
