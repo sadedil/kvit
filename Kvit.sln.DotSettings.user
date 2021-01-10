@@ -1,11 +1,11 @@
 ﻿<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6027d4c6_002Ddb77_002D4f90_002Db4b7_002Dab01d6dd38c8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=6027d4c6_002Ddb77_002D4f90_002Db4b7_002Dab01d6dd38c8/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test1" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::63B990B6-9033-4611-81E2-CC967664D60A::net5.0::Kvit.IntegrationTests.FetchTests.KvitVersion_ShouldReturn_Semver_Result2&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::63B990B6-9033-4611-81E2-CC967664D60A::net5.0::Kvit.IntegrationTests.CliTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=69a975ad_002Dc26f_002D4670_002D83dd_002D1ef4e3a1bd2c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Kvit_Version_ShouldReturn_UsageInfo" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=69a975ad_002Dc26f_002D4670_002D83dd_002D1ef4e3a1bd2c/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" Name="Kvit_Version_ShouldReturn_UsageInfo" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;
   &lt;TestAncestor&gt;
-    &lt;TestId&gt;xUnit::63B990B6-9033-4611-81E2-CC967664D60A::net5.0::Kvit.IntegrationTests.FetchTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::63B990B6-9033-4611-81E2-CC967664D60A::net5.0::Kvit.IntegrationTests.CliTests.Kvit_Fetch_ShouldCreate_Keys_and_Folders&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>
