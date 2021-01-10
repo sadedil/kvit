@@ -8,6 +8,7 @@ namespace Kvit
 
         public static readonly Uri DefaultConsulUri = new Uri("http://localhost:8500");
 
-        public static readonly string BaseDirectory = Environment.GetEnvironmentVariable(EnvironmentVariables.KVIT_BASE_DIR);
+        public static readonly string BaseDirectory = 
+            Environment.GetEnvironmentVariable(EnvironmentVariables.KVIT_BASE_DIR) ?? "./";
     }
 }
