@@ -34,7 +34,7 @@ namespace Kvit.IntegrationTests.TestHelpers
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "dotnet",
-                    Arguments = $" run -- {args}",
+                    Arguments = $"run --no-build -- {args}",
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
@@ -74,7 +74,7 @@ namespace Kvit.IntegrationTests.TestHelpers
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "dotnet",
-                    Arguments = $" run --project {projectAbsolutePath} -- {args}",
+                    Arguments = $" run --no-build --project {projectAbsolutePath} -- {args}",
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
@@ -92,6 +92,25 @@ namespace Kvit.IntegrationTests.TestHelpers
             var stderr = process.StandardError.ReadToEnd();
 
             return (randomBaseDir, stdout, stderr);
+        }
+
+        internal static void BuildKvit()
+        {
+            var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "dotnet",
+                    Arguments = $"build",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    WorkingDirectory = KvitProjectPathRelativeToUnitTestDirectory,
+                }
+            };
+            process.Start();
+            process.WaitForExit();
         }
     }
 }

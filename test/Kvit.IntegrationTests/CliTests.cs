@@ -7,6 +7,8 @@ using Xunit;
 
 namespace Kvit.IntegrationTests
 {
+    
+    [Collection(nameof(CliCollection))]
     public class CliTests
     {
         [Theory]
@@ -70,8 +72,8 @@ namespace Kvit.IntegrationTests
             // Assert files
             var fetchedFiles = Directory.GetFiles(baseDir, "*.*", SearchOption.AllDirectories);
             var file1 = fetchedFiles.FirstOrDefault(f => f.EndsWith("key1"));
-            var file2 = fetchedFiles.FirstOrDefault(f => f.EndsWith("dir1/key1_in_dir1"));
-            var file3 = fetchedFiles.FirstOrDefault(f => f.EndsWith("dir2/dir3/dir4/key_in_subfolder"));
+            var file2 = fetchedFiles.FirstOrDefault(f => f.EndsWith($"dir1{Path.DirectorySeparatorChar}key1_in_dir1"));
+            var file3 = fetchedFiles.FirstOrDefault(f => f.EndsWith($"dir2{Path.DirectorySeparatorChar}dir3{Path.DirectorySeparatorChar}dir4{Path.DirectorySeparatorChar}key_in_subfolder"));
 
             file1.ShouldNotBeNull();
             file2.ShouldNotBeNull();
