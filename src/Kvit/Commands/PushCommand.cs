@@ -36,7 +36,7 @@ namespace Kvit.Commands
             using var client = ConsulHelper.CreateConsulClient(address, token);
 
             var baseDirectoryInfo = new DirectoryInfo(Common.BaseDirectory);
-            var kvitDirectoryPath = Path.Combine(baseDirectoryInfo.Name, ".kvit/");
+            var kvitDirectoryPath = Path.Combine(baseDirectoryInfo.ToString(), ".kvit/");
 
             var allFilenames = Directory.GetFiles(Common.BaseDirectory, "*.*", SearchOption.AllDirectories);
             var usedFiles = allFilenames
@@ -49,9 +49,16 @@ namespace Kvit.Commands
 
             foreach (var fileInfo in usedFiles)
             {
-                var consulPath = fileInfo.FullName.StartsWith(baseDirectoryInfo.FullName)
-                    ? fileInfo.FullName.Substring(baseDirectoryInfo.FullName.Length + 1)
+                // TODO: Low: Find an elegant way to do normalize paths
+                var fullDirectoryPath = baseDirectoryInfo.FullName.EndsWith("/")
+                    ? baseDirectoryInfo.FullName
+                    : $"{baseDirectoryInfo.FullName}/";
+
+                var consulPath = fileInfo.FullName.StartsWith(fullDirectoryPath)
+                    ? fileInfo.FullName.Substring(baseDirectoryInfo.FullName.Length)
                     : fileInfo.FullName;
+
+                consulPath = consulPath.Trim('/');
 
                 var textContent = await File.ReadAllTextAsync(fileInfo.FullName, Encoding.UTF8);
 
@@ -68,7 +75,7 @@ namespace Kvit.Commands
                 await client.KV.Txn(txnOpsChunk);
             }
 
-            Console.WriteLine($"{txnOps.Count} key(s) pushed. Address: {address}");
+            Console.WriteLine($"{txnOps.Count} key(s) pushed. Address: {client?.Config?.Address}");
         }
     }
 }

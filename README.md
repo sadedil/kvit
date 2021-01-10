@@ -59,7 +59,8 @@ kvit push [--address <address>] [--token <token>]
 
  - [ ] Take a backup before the `fetch` and `push`  
  - [ ] Add diff support before push to see what's different between local folder and remote Consul server
- - [ ] Add confirmation messages for commands like "Do you want to continue?"
+ - [ ] Add confirmation messages for commands like "*Do you want to continue?*"
+ - [ ] Support the deletion of keys and values from Consul when they were deleted from local folder
 
 ## How to contribute?
 
