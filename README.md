@@ -3,7 +3,7 @@
 [![Build & Test & Pack](https://github.com/sadedil/kvit/workflows/Build%20&%20Test%20&%20Pack/badge.svg)](https://github.com/sadedil/kvit/actions)
 [![NuGet (Kvit)](https://img.shields.io/nuget/v/Kvit.svg)](https://www.nuget.org/packages/Kvit/)
 
-**Kvit** helps you to sync your key and value pairs between HashiCorp Consul and file system easily. It's developed as an open source CLI app.
+**Kvit** helps you to sync your key and value pairs between *HashiCorp Consul* and file system easily. It's developed as an open source CLI app.
 
 ## What "Kvit" means?
 
@@ -13,10 +13,11 @@
 
 > .NET 5 runtime is a prerequisite. And can be downloaded from [here](https://dotnet.microsoft.com/download).
 > 
-**Kvit** developed as a cross platform console app with .NET 5. You can easily install as a global cli tool.
+**Kvit** developed as a cross platform console app with *.NET 5.* You can easily install as a global cli tool.
 
 ```bash
-dotnet tool install -g kvit
+# Install if not installed, update to the last version if already installed
+dotnet tool update -g kvit
 ```
 
 This command pulls the latest Kvit binary from [NuGet](https://www.nuget.org/packages/Kvit/). And add this binary to your path.
@@ -55,12 +56,33 @@ Uploads your key/value pairs from current directory to your Consul server.
 kvit push [--address <address>] [--token <token>]
 ```
 
+## How to build & test and run on your computer?
+
+### Requirements
+ - *[.NET 5 SDK](https://dotnet.microsoft.com/download)*
+ - *Docker* or a real *Consul* server (for testing)
+
+### Running project locally
+
+Simply run on your IDE or type `dotnet run` in `src/Kvit` folder.
+
+### Running tests locally
+
+To run Integration tests, you will need a *Consul* running on port `8900`. Easiest way to do this, using *Docker*.
+
+```bash
+docker run -d --name=consul-for-kvit-testing -p 8900:8500 consul
+```
+
+After then, you can simply run tests on your IDE or type `dotnet test` in project's root folder. 
+
 ## Roadmap
 
+ - [x] A clear README
  - [ ] Take a backup before the `fetch` and `push`  
- - [ ] Add diff support before push to see what's different between local folder and remote Consul server
+ - [ ] Add diff support before push to see what's different between local folder and remote *Consul* server
  - [ ] Add confirmation messages for commands like "*Do you want to continue?*"
- - [ ] Support the deletion of keys and values from Consul when they were deleted from local folder
+ - [ ] Support the deletion of keys and values from *Consul* when they were deleted from local folder
 
 ## How to contribute?
 
