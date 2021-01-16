@@ -5,19 +5,25 @@ using System.Reflection;
 
 namespace Kvit.IntegrationTests.TestHelpers
 {
-    public static class ProcessHelper
+    internal static class ProcessHelper
     {
         private const string KvitProjectPathRelativeToUnitTestDirectory = "../../../../../src/Kvit";
         internal const string TestConsulUrl = "http://localhost:8900";
 
-        internal static (string baseDir, string stdout, string stderr) RunKvit(bool runWithBaseDir, string args)
+        internal static (string stdout, string stderr) RunKvit(bool runWithBaseDir, string baseDir, string args)
         {
             return runWithBaseDir
-                ? RunKvitWithBaseDirEnvironmentVariable(args)
-                : RunKvitWithoutBaseDirEnvironmentVariable(args);
+                ? RunKvitWithBaseDirEnvironmentVariable(baseDir, args)
+                : RunKvitWithoutBaseDirEnvironmentVariable(baseDir, args);
         }
 
-        private static string GetRandomBaseDir() => Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "kvit_test");
+        internal static string CreateRandomBaseDir()
+        {
+            var baseDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString(), "kvit_test");
+            Directory.CreateDirectory(baseDir);
+
+            return baseDir;
+        }
 
         /// <summary>
         /// This proccess runs with KVIT_BASE_DIR environment variable
@@ -25,9 +31,9 @@ namespace Kvit.IntegrationTests.TestHelpers
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        private static (string baseDir, string stdout, string stderr) RunKvitWithBaseDirEnvironmentVariable(string args)
+        private static (string stdout, string stderr) RunKvitWithBaseDirEnvironmentVariable(string baseDir, string args)
         {
-            var randomBaseDir = GetRandomBaseDir();
+            //var baseDir = CreateRandomBaseDir();
 
             var process = new Process
             {
@@ -42,7 +48,7 @@ namespace Kvit.IntegrationTests.TestHelpers
                     WorkingDirectory = KvitProjectPathRelativeToUnitTestDirectory,
                     Environment =
                     {
-                        {"KVIT_BASE_DIR", randomBaseDir},
+                        {"KVIT_BASE_DIR", baseDir},
                         {"KVIT_ADDRESS", TestConsulUrl}
                     }
                 }
@@ -52,7 +58,7 @@ namespace Kvit.IntegrationTests.TestHelpers
             var stdout = process.StandardOutput.ReadToEnd();
             var stderr = process.StandardError.ReadToEnd();
 
-            return (randomBaseDir, stdout, stderr);
+            return (stdout, stderr);
         }
 
         /// <summary>
@@ -61,10 +67,8 @@ namespace Kvit.IntegrationTests.TestHelpers
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        private static (string baseDir, string stdout, string stderr) RunKvitWithoutBaseDirEnvironmentVariable(string args)
+        private static (string stdout, string stderr) RunKvitWithoutBaseDirEnvironmentVariable(string baseDir, string args)
         {
-            var randomBaseDir = GetRandomBaseDir();
-            Directory.CreateDirectory(randomBaseDir);
             var unitTestAssemblyFile = Assembly.GetExecutingAssembly().Location; // Kvit.IntegrationTests.dll
             var unitTestAssemblyDirectory = new FileInfo(unitTestAssemblyFile).Directory.FullName;
             var projectAbsolutePath = Path.Combine(unitTestAssemblyDirectory, KvitProjectPathRelativeToUnitTestDirectory);
@@ -79,7 +83,7 @@ namespace Kvit.IntegrationTests.TestHelpers
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
-                    WorkingDirectory = randomBaseDir,
+                    WorkingDirectory = baseDir,
                     Environment =
                     {
                         {"KVIT_ADDRESS", TestConsulUrl},
@@ -91,7 +95,7 @@ namespace Kvit.IntegrationTests.TestHelpers
             var stdout = process.StandardOutput.ReadToEnd();
             var stderr = process.StandardError.ReadToEnd();
 
-            return (randomBaseDir, stdout, stderr);
+            return (stdout, stderr);
         }
 
         internal static void BuildKvit()

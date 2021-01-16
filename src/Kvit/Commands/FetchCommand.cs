@@ -32,7 +32,11 @@ namespace Kvit.Commands
 
         private async Task ExecuteAsync(Uri address, string token)
         {
-            var nonFolderPairs = await GetNonFolderPairsAsync(address, token);
+            using var client = ConsulHelper.CreateConsulClient(address, token);
+            Console.WriteLine($"Fetch started. Address: {client?.Config?.Address}");
+
+            var nonFolderPairs = await GetNonFolderPairsAsync(client);
+
             if (nonFolderPairs == null)
             {
                 return;
@@ -87,11 +91,10 @@ namespace Kvit.Commands
             }
         }
 
-        private async Task<IEnumerable<KVPair>> GetNonFolderPairsAsync(Uri address, string token)
+        private async Task<IEnumerable<KVPair>> GetNonFolderPairsAsync(ConsulClient client)
         {
             try
             {
-                using var client = ConsulHelper.CreateConsulClient(address, token);
                 var pairs = await client.KV.List(prefix: "/");
                 return pairs.Response.Where(p => !p.Key.EndsWith("/")).AsEnumerable();
             }
