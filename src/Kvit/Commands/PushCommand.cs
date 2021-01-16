@@ -34,6 +34,7 @@ namespace Kvit.Commands
         private async Task ExecuteAsync(Uri address, string token)
         {
             using var client = ConsulHelper.CreateConsulClient(address, token);
+            Console.WriteLine($"Push started. Address: {client?.Config?.Address}");
 
             var baseDirectoryInfo = new DirectoryInfo(Common.BaseDirectory);
             var kvitDirectoryPath = Path.Combine(baseDirectoryInfo.ToString(), ".kvit/");
@@ -75,7 +76,7 @@ namespace Kvit.Commands
                 await client.KV.Txn(txnOpsChunk);
             }
 
-            Console.WriteLine($"{txnOps.Count} key(s) pushed. Address: {client?.Config?.Address}");
+            Console.WriteLine($"{txnOps.Count} key(s) pushed.");
         }
     }
 }
