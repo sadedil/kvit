@@ -24,6 +24,8 @@
   <ItemGroup>
     <PackageReference Include="Consul" Version="1.6.1.1" />
     <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+    <PackageReference Include="Spectre.Console" Version="0.37.0" />
+    <PackageReference Include="Spectre.Console.Extensions.Table" Version="0.3.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
   </ItemGroup>
 
