@@ -30,38 +30,28 @@ namespace Kvit.Commands
             Handler = CommandHandler.Create<Uri, string>(ExecuteAsync);
         }
 
-
         private async Task ExecuteAsync(Uri address, string token)
         {
             using var client = ConsulHelper.CreateConsulClient(address, token);
             Console.WriteLine($"Push started. Address: {client?.Config?.Address}");
 
             var baseDirectoryInfo = new DirectoryInfo(Common.BaseDirectory);
-            var kvitDirectoryPath = Path.Combine(baseDirectoryInfo.ToString(), ".kvit/");
-
-            var allFilenames = Directory.GetFiles(Common.BaseDirectory, "*.*", SearchOption.AllDirectories);
-            var usedFiles = allFilenames
-                .Select(fn => new FileInfo(fn))
-                .Where(fi => !fi.ToString().StartsWith(kvitDirectoryPath))
-                .Where(fi => fi.Name != ".DS_Store")
+            var usedFiles = Directory
+                .GetFiles(Common.BaseDirectory, "*.*", SearchOption.AllDirectories)
+                .Select(f => new FileInfo(f).FullName.ToUnixPath().TrimEnd('/'))
+                .Where(f => !f.StartsWith(Common.DotKvitDirectoryFullPath))
+                .Where(f => f != ".DS_Store")
+                .Where(f => f != "desktop.ini")
                 .ToList();
 
             var txnOps = new List<KVTxnOp>();
-
-            foreach (var fileInfo in usedFiles)
+            foreach (var filePath in usedFiles)
             {
-                // TODO: Low: Find an elegant way to do normalize paths
-                var fullDirectoryPath = baseDirectoryInfo.FullName.EndsWith("/")
-                    ? baseDirectoryInfo.FullName
-                    : $"{baseDirectoryInfo.FullName}/";
+                var consulPath = filePath.StartsWith(Common.BaseDirectoryFullPath)
+                    ? filePath.Substring(Common.BaseDirectoryFullPath.Length)
+                    : filePath;
 
-                var consulPath = fileInfo.FullName.StartsWith(fullDirectoryPath)
-                    ? fileInfo.FullName.Substring(baseDirectoryInfo.FullName.Length)
-                    : fileInfo.FullName;
-
-                consulPath = consulPath.Trim('/');
-
-                var textContent = await File.ReadAllTextAsync(fileInfo.FullName, Encoding.UTF8);
+                var textContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
 
                 txnOps.Add(new KVTxnOp(consulPath, KVTxnVerb.Set)
                 {
@@ -71,6 +61,7 @@ namespace Kvit.Commands
                 Console.WriteLine($"Key: {consulPath}");
             }
 
+            Console.WriteLine($"{txnOps.Count} key(s) prepared. Trying to push...");
             foreach (var txnOpsChunk in txnOps.ChunkBy(Common.ConsulTransactionMaximumOperationCount))
             {
                 await client.KV.Txn(txnOpsChunk);

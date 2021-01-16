@@ -7,7 +7,6 @@ using Xunit;
 
 namespace Kvit.IntegrationTests
 {
-    
     [Collection(nameof(CliCollection))]
     public class CliTests
     {
@@ -17,7 +16,8 @@ namespace Kvit.IntegrationTests
         public void Kvit_Version_ShouldReturn_Semver_Result(bool runWithBaseDir)
         {
             // Arrange & Act
-            var (baseDir, stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, "--version");
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--version");
 
             // Assert
             stdout.ShouldMatch(@"\d+\.\d+\.\d+");
@@ -29,7 +29,8 @@ namespace Kvit.IntegrationTests
         public void Kvit_Help_ShouldReturn_UsageInfo(bool runWithBaseDir)
         {
             // Arrange & Act
-            var (baseDir, stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, "--help");
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--help");
 
             // Assert
             stdout.ShouldContain("Kvit:");
@@ -44,8 +45,9 @@ namespace Kvit.IntegrationTests
         public void Kvit_WithoutArguments_ShouldShow_UsageInfo(bool runWithBaseDir)
         {
             // Arrange & Act
-            var (baseDirHelp, stdoutHelp, stderrHelp) = ProcessHelper.RunKvit(runWithBaseDir, "--help");
-            var (baseDirDefault, stdoutDefault, stderrDefault) = ProcessHelper.RunKvit(runWithBaseDir, "");
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+            var (stdoutHelp, stderrHelp) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--help");
+            var (stdoutDefault, stderrDefault) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "");
 
             // Assert
             stdoutHelp.ShouldBe(stdoutDefault);
@@ -54,16 +56,18 @@ namespace Kvit.IntegrationTests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task Kvit_Fetch_ShouldCreate_Keys_and_Folders(bool runWithBaseDir)
+        public async Task Kvit_Fetch_ShouldCreate_Keys_and_Folders_on_FileSystem(bool runWithBaseDir)
         {
             // Arrange
+            await ConsulHelper.DeleteAllKeys();
             await ConsulHelper.AddDirectoryToConsulAsync("dir1");
             await ConsulHelper.AddDataToConsulAsync("key1", "value1");
             await ConsulHelper.AddDataToConsulAsync("dir1/key1_in_dir1", "value2");
             await ConsulHelper.AddDataToConsulAsync("dir2/dir3/dir4/key_in_subfolder", "value3");
 
             // Act
-            var (baseDir, stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, "fetch");
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "fetch");
 
             // Assert
             stdout.ShouldContain("All keys successfully fetched");
@@ -87,6 +91,39 @@ namespace Kvit.IntegrationTests
             file1Content.ShouldBe(@"""value1""");
             file2Content.ShouldBe(@"""value2""");
             file3Content.ShouldBe(@"""value3""");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Kvit_Push_ShouldCreate_Keys_and_Folders_on_Consul(bool runWithBaseDir)
+        {
+            // Arrange
+            await ConsulHelper.DeleteAllKeys();
+
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+            FileHelper.WriteAllText(Path.Combine(baseDir, "file0"), "555");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "folder1", "file1"), "true");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "folder1", "file2"), @"{""myNameIsFile2"": ""yes""}");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "folder1", "folder1.1", "file3"), @"{""iaminasubfolder"": ""absolutely""}");
+
+            // Act
+            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "push");
+
+            // Assert
+            stdout.ShouldContain("key(s) pushed");
+            stderr.ShouldBeEmpty();
+
+            // Assert keys
+            var file0Content = await ConsulHelper.GetValueFromConsulAsync("file0");
+            var file1Content = await ConsulHelper.GetValueFromConsulAsync("folder1/file1");
+            var file2Content = await ConsulHelper.GetValueFromConsulAsync("folder1/file2");
+            var file3Content = await ConsulHelper.GetValueFromConsulAsync("folder1/folder1.1/file3");
+
+            file0Content.ShouldBe("555");
+            file1Content.ShouldBe("true");
+            file2Content.ShouldBe(@"{""myNameIsFile2"": ""yes""}");
+            file3Content.ShouldBe(@"{""iaminasubfolder"": ""absolutely""}");
         }
     }
 }
