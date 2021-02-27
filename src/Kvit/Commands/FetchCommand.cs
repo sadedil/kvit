@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Consul;
 
 namespace Kvit.Commands
 {
@@ -30,16 +29,16 @@ namespace Kvit.Commands
             Handler = CommandHandler.Create<Uri, string>(ExecuteAsync);
         }
 
-        private async Task ExecuteAsync(Uri address, string token)
+        private async Task<int> ExecuteAsync(Uri address, string token)
         {
             using var client = ConsulHelper.CreateConsulClient(address, token);
             Console.WriteLine($"Fetch started. Address: {client?.Config?.Address}");
 
-            var nonFolderPairs = await GetNonFolderPairsAsync(client);
+            var nonFolderPairs = await Common.GetNonFolderPairsAsync(client);
 
             if (nonFolderPairs == null)
             {
-                return;
+                return 1;
             }
 
             var fetchResults = new List<FetchResult>();
@@ -79,6 +78,7 @@ namespace Kvit.Commands
             if (fetchResults.All(f => f.IsSucceeded))
             {
                 Console.WriteLine("All keys successfully fetched.");
+                return 0;
             }
             else
             {
@@ -88,20 +88,8 @@ namespace Kvit.Commands
                 {
                     await Console.Error.WriteLineAsync($"{fetchResult.Key}: {fetchResult.ErrorMessage}");
                 }
-            }
-        }
 
-        private async Task<IEnumerable<KVPair>> GetNonFolderPairsAsync(ConsulClient client)
-        {
-            try
-            {
-                var pairs = await client.KV.List(prefix: "/");
-                return pairs.Response.Where(p => !p.Key.EndsWith("/")).AsEnumerable();
-            }
-            catch (Exception ex)
-            {
-                await Console.Error.WriteLineAsync($"Cannot get keys. Error: {ex.Message}");
-                return null;
+                return 1;
             }
         }
 

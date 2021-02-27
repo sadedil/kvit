@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Kvit.IntegrationTests.TestHelpers;
+using Newtonsoft.Json;
 using Shouldly;
 using Xunit;
 
@@ -17,7 +21,7 @@ namespace Kvit.IntegrationTests
         {
             // Arrange & Act
             var baseDir = ProcessHelper.CreateRandomBaseDir();
-            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--version");
+            var (stdout, stderr, exitCode) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--version");
 
             // Assert
             stdout.ShouldMatch(@"\d+\.\d+\.\d+");
@@ -30,7 +34,7 @@ namespace Kvit.IntegrationTests
         {
             // Arrange & Act
             var baseDir = ProcessHelper.CreateRandomBaseDir();
-            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--help");
+            var (stdout, stderr, exitCode) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--help");
 
             // Assert
             stdout.ShouldContain("Kvit:");
@@ -46,8 +50,8 @@ namespace Kvit.IntegrationTests
         {
             // Arrange & Act
             var baseDir = ProcessHelper.CreateRandomBaseDir();
-            var (stdoutHelp, stderrHelp) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--help");
-            var (stdoutDefault, stderrDefault) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "");
+            var (stdoutHelp, stderrHelp, exitCodeHelp) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "--help");
+            var (stdoutDefault, stderrDefault, exitCodeDefault) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "");
 
             // Assert
             stdoutHelp.ShouldBe(stdoutDefault);
@@ -67,11 +71,12 @@ namespace Kvit.IntegrationTests
 
             // Act
             var baseDir = ProcessHelper.CreateRandomBaseDir();
-            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "fetch");
+            var (stdout, stderr, exitCode) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "fetch");
 
             // Assert
             stdout.ShouldContain("All keys successfully fetched");
             stderr.ShouldBeEmpty();
+            exitCode.ShouldBe(0);
 
             // Assert files
             var fetchedFiles = Directory.GetFiles(baseDir, "*.*", SearchOption.AllDirectories);
@@ -108,11 +113,12 @@ namespace Kvit.IntegrationTests
             FileHelper.WriteAllText(Path.Combine(baseDir, "folder1", "folder1.1", "file3"), @"{""iaminasubfolder"": ""absolutely""}");
 
             // Act
-            var (stdout, stderr) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "push");
+            var (stdout, stderr, exitCode) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "push");
 
             // Assert
             stdout.ShouldContain("key(s) pushed");
             stderr.ShouldBeEmpty();
+            exitCode.ShouldBe(0);
 
             // Assert keys
             var file0Content = await ConsulHelper.GetValueFromConsulAsync("file0");
@@ -124,6 +130,195 @@ namespace Kvit.IntegrationTests
             file1Content.ShouldBe("true");
             file2Content.ShouldBe(@"{""myNameIsFile2"": ""yes""}");
             file3Content.ShouldBe(@"{""iaminasubfolder"": ""absolutely""}");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Kvit_Diff_ShouldShow_Missing_Files_between_FileSystem_and_Consul(bool runWithBaseDir)
+        {
+            // Arrange
+            await ConsulHelper.DeleteAllKeys();
+
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+
+            // missingFilesOnConsul
+            FileHelper.WriteAllText(Path.Combine(baseDir, "file"), @"""text""");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "folder1", "file2"), @"{""myNameIsFile2"": ""yes""}");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "folder1", "folder1.1", "file3"), @"{""iaminasubfolder"": ""absolutely""}");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "file0"), @"""555""");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "key1"), @"""value""");
+            FileHelper.WriteAllText(Path.Combine(baseDir, "folder1", "file1"), "true");
+
+            // missingFilesOnFileSystem
+            await ConsulHelper.AddDirectoryToConsulAsync("dir1");
+            await ConsulHelper.AddDataToConsulAsync("file0", "555");
+            await ConsulHelper.AddDataToConsulAsync("key1", "value1");
+            await ConsulHelper.AddDataToConsulAsync("folder1/file1", "true");
+            await ConsulHelper.AddDataToConsulAsync("key", "value");
+            await ConsulHelper.AddDataToConsulAsync("dir1/key1_in_dir1", "value2");
+            await ConsulHelper.AddDataToConsulAsync("dir2/dir3/dir4/key_in_subfolder", "value3");
+            
+            // Act
+            var (stdout, stderr, exitCode) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "diff");
+            
+            // Assert
+            var stdoutLines = stdout.Split("\n").Select(x => x.Split("│")).ToArray();
+
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[2][1].ShouldContain("Files"),
+                () => stdoutLines[2][2].ShouldContain("Consul - Local")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[4][1].ShouldContain("file0"),
+                () => stdoutLines[4][2].ShouldContain("==")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[5][1].ShouldContain("folder1/file1"),
+                () => stdoutLines[5][2].ShouldContain("xx")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[6][1].ShouldContain("key1"),
+                () => stdoutLines[6][2].ShouldContain("xx")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[7][1].ShouldContain("file"),
+                () => stdoutLines[7][2].ShouldContain("<<")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[8][1].ShouldContain("folder1/file2"),
+                () => stdoutLines[8][2].ShouldContain("<<")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[9][1].ShouldContain("folder1/folder1.1/file3"),
+                () => stdoutLines[9][2].ShouldContain("<<")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[10][1].ShouldContain("dir1/key1_in_dir1"),
+                () => stdoutLines[10][2].ShouldContain(">>")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[11][1].ShouldContain("dir2/dir3/dir4/key_in_subfolder"),
+                () => stdoutLines[11][2].ShouldContain(">>")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[11][1].ShouldContain("key"),
+                () => stdoutLines[11][2].ShouldContain(">>")
+            );
+
+            exitCode.ShouldBe(2);
+            stderr.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Kvit_Diff_ShouldShow_File_Contents_are_Equal_between_FileSystem_and_Consul(bool runWithBaseDir)
+        {
+            // Arrange
+            await ConsulHelper.DeleteAllKeys();
+
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+            
+            var testObj = new {
+                key1 = "value1",
+                key2 = new {
+                    key3 = "value3",
+                    key4 = new {
+                        key5 = "value5"
+                    }
+                }
+            };
+            
+            FileHelper.WriteAllText(Path.Combine(baseDir, "file1"), JsonConvert.SerializeObject(testObj, Formatting.Indented));
+
+            await ConsulHelper.AddDataToConsulAsync("file1", testObj);
+
+            // Act
+            var (stdout, stderr, exitCode) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "diff --file file1");
+
+            // Assert
+            var stdoutLines = stdout.Split("\n").Select(x => x.Split("│")).ToArray();
+
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[2][1].ShouldContain("Consul"),
+                () => stdoutLines[2][2].ShouldContain("Local")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[5][1].ShouldContain(@"""key1"": ""value1"""),
+                () => stdoutLines[5][2].ShouldContain(@"""key1"": ""value1""")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[7][1].ShouldContain(@"""key3"": ""value3"""),
+                () => stdoutLines[7][2].ShouldContain(@"""key3"": ""value3""")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[9][1].ShouldContain(@"""key5"": ""value5"""),
+                () => stdoutLines[9][2].ShouldContain(@"""key5"": ""value5""")
+            );
+
+            exitCode.ShouldBe(0);
+            stderr.ShouldBeEmpty();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Kvit_Diff_ShouldShow_File_Contents_not_Equal_between_FileSystem_and_Consul(bool runWithBaseDir)
+        {
+            // Arrange
+            await ConsulHelper.DeleteAllKeys();
+
+            var baseDir = ProcessHelper.CreateRandomBaseDir();
+            
+            var localObj = new {
+                key1 = "value1",
+                key2 = new {
+                    key3 = "value3",
+                    key4 = new {
+                        key5 = "value5"
+                    }
+                }
+            };
+            
+            FileHelper.WriteAllText(Path.Combine(baseDir, "file1"), JsonConvert.SerializeObject(localObj, Formatting.Indented));
+
+            var consulObj = new {
+                key1 = "value1",
+                key2 = new {
+                    key3 = "value2",
+                    key4 = new {
+                        key5 = "value"
+                    }
+                }
+            };
+            await ConsulHelper.AddDataToConsulAsync("file1", consulObj);
+
+            // Act
+            var (stdout, stderr, exitCode) = ProcessHelper.RunKvit(runWithBaseDir, baseDir, "diff --file file1");
+
+            // Assert
+            var stdoutLines = stdout.Split("\n").Select(x => x.Split("│")).ToArray();
+
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[2][1].ShouldContain("Consul"),
+                () => stdoutLines[2][2].ShouldContain("Local")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[5][1].ShouldContain(@"""key1"": ""value1"""),
+                () => stdoutLines[5][2].ShouldContain(@"""key1"": ""value1""")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[7][1].ShouldContain(@"""value2"""),
+                () => stdoutLines[7][2].ShouldContain(@"""value3""")
+            );
+            stdoutLines.ShouldSatisfyAllConditions(
+                () => stdoutLines[9][1].ShouldContain(@"""value"""),
+                () => stdoutLines[9][2].ShouldContain(@"""value5""")
+            );
+
+            exitCode.ShouldBe(2);
+            stderr.ShouldBeEmpty();
         }
     }
 }

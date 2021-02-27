@@ -6,7 +6,7 @@ namespace Kvit
 {
     internal static class Program
     {
-        private static Task Main(string[] args)
+        private static Task<int> Main(string[] args)
         {
             var rootCommand = new RootCommand
             {
@@ -15,6 +15,7 @@ namespace Kvit
 
             rootCommand.AddCommand(new FetchCommand());
             rootCommand.AddCommand(new PushCommand());
+            rootCommand.AddCommand(new DiffCommand());
 
             return rootCommand.InvokeAsync(args);
         }

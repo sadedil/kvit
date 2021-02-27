@@ -10,7 +10,7 @@ namespace Kvit.IntegrationTests.TestHelpers
         private const string KvitProjectPathRelativeToUnitTestDirectory = "../../../../../src/Kvit";
         internal const string TestConsulUrl = "http://localhost:8900";
 
-        internal static (string stdout, string stderr) RunKvit(bool runWithBaseDir, string baseDir, string args)
+        internal static (string stdout, string stderr, int exitCode) RunKvit(bool runWithBaseDir, string baseDir, string args)
         {
             return runWithBaseDir
                 ? RunKvitWithBaseDirEnvironmentVariable(baseDir, args)
@@ -31,7 +31,7 @@ namespace Kvit.IntegrationTests.TestHelpers
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        private static (string stdout, string stderr) RunKvitWithBaseDirEnvironmentVariable(string baseDir, string args)
+        private static (string stdout, string stderr, int exitCode) RunKvitWithBaseDirEnvironmentVariable(string baseDir, string args)
         {
             //var baseDir = CreateRandomBaseDir();
 
@@ -54,11 +54,12 @@ namespace Kvit.IntegrationTests.TestHelpers
                 }
             };
             process.Start();
-
+            
             var stdout = process.StandardOutput.ReadToEnd();
             var stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit();
 
-            return (stdout, stderr);
+            return (stdout, stderr, process.ExitCode);
         }
 
         /// <summary>
@@ -67,7 +68,7 @@ namespace Kvit.IntegrationTests.TestHelpers
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        private static (string stdout, string stderr) RunKvitWithoutBaseDirEnvironmentVariable(string baseDir, string args)
+        private static (string stdout, string stderr, int exitCode) RunKvitWithoutBaseDirEnvironmentVariable(string baseDir, string args)
         {
             var unitTestAssemblyFile = Assembly.GetExecutingAssembly().Location; // Kvit.IntegrationTests.dll
             var unitTestAssemblyDirectory = new FileInfo(unitTestAssemblyFile).Directory.FullName;
@@ -94,8 +95,9 @@ namespace Kvit.IntegrationTests.TestHelpers
 
             var stdout = process.StandardOutput.ReadToEnd();
             var stderr = process.StandardError.ReadToEnd();
+            process.WaitForExit();
 
-            return (stdout, stderr);
+            return (stdout, stderr, process.ExitCode);
         }
 
         internal static void BuildKvit()

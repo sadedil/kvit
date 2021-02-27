@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Consul;
@@ -30,26 +29,17 @@ namespace Kvit.Commands
             Handler = CommandHandler.Create<Uri, string>(ExecuteAsync);
         }
 
-        private async Task ExecuteAsync(Uri address, string token)
+        private async Task<int> ExecuteAsync(Uri address, string token)
         {
             using var client = ConsulHelper.CreateConsulClient(address, token);
             Console.WriteLine($"Push started. Address: {client?.Config?.Address}");
 
-            var baseDirectoryInfo = new DirectoryInfo(Common.BaseDirectory);
-            var usedFiles = Directory
-                .GetFiles(Common.BaseDirectory, "*.*", SearchOption.AllDirectories)
-                .Select(f => new FileInfo(f).FullName.ToUnixPath().TrimEnd('/'))
-                .Where(f => !f.StartsWith(Common.DotKvitDirectoryFullPath))
-                .Where(f => f != ".DS_Store")
-                .Where(f => f != "desktop.ini")
-                .ToList();
+            var usedFiles = Common.GetLocalFiles();
 
             var txnOps = new List<KVTxnOp>();
             foreach (var filePath in usedFiles)
             {
-                var consulPath = filePath.StartsWith(Common.BaseDirectoryFullPath)
-                    ? filePath.Substring(Common.BaseDirectoryFullPath.Length)
-                    : filePath;
+                var consulPath = Path.GetRelativePath(Common.BaseDirectoryFullPath, filePath).ToUnixPath();
 
                 var textContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
 
@@ -68,6 +58,7 @@ namespace Kvit.Commands
             }
 
             Console.WriteLine($"{txnOps.Count} key(s) pushed.");
+            return 0;
         }
     }
 }
