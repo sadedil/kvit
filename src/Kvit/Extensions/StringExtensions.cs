@@ -15,5 +15,10 @@ namespace Kvit.Extensions
         {
             return source.Replace('\\', '/');
         }
+
+        public static string Colorize(this string value, string color)
+        {
+            return $"[{color}]{value}[/]";
+        }
     }
 }

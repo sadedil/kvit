@@ -18,9 +18,9 @@ namespace Kvit.IntegrationTests.TestHelpers
             BaseAddress = new Uri(ProcessHelper.TestConsulUrl + "/v1/kv/")
         };
 
-        public static Task AddDataToConsulAsync(string key, string value)
+        public static Task AddDataToConsulAsync(string key, object value)
         {
-            return _httpClient.PutAsJsonAsync(key, value);
+            return _httpClient.PutAsJsonAsync(key, value, new JsonSerializerOptions() { WriteIndented = true });
         }
 
         public static Task AddDirectoryToConsulAsync(string key)

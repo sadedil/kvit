@@ -56,6 +56,18 @@ Uploads your key/value pairs from current directory to your Consul server.
 kvit push [--address <address>] [--token <token>]
 ```
 
+### `kvit diff`
+
+Compares keys between Consul server and current directory.
+
+- If you omit `address` then tries to connect ``http://localhost:8500``
+- If you omit `token` then tries to connect without authentication.
+- If you pass `file` then compares the file contents.
+
+```
+kvit diff [--address <address>] [--token <token>] [--file <file>]
+```
+
 ## How to build & test and run on your computer?
 
 ### Requirements
@@ -80,7 +92,7 @@ After then, you can simply run tests on your IDE or type `dotnet test` in projec
 
  - [x] A clear README
  - [ ] Take a backup before the `fetch` and `push`  
- - [ ] Add diff support before push to see what's different between local folder and remote *Consul* server
+ - [x] Add diff support before push to see what's different between local folder and remote *Consul* server
  - [ ] Add confirmation messages for commands like "*Do you want to continue?*"
  - [ ] Support the deletion of keys and values from *Consul* when they were deleted from local folder
 
