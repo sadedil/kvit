@@ -93,6 +93,12 @@ To run Integration tests, you will need a *Consul* running on port `8900`. Easie
 docker run -d --name=consul-for-kvit-testing -p 8900:8500 consul
 ```
 
+If you don't have Docker on your system, you can [download](https://www.consul.io/downloads) *Consul* and run command below
+
+```bash
+consul agent -dev -http-port=8900
+```
+
 After then, you can simply run tests on your IDE or type `dotnet test` in project's root folder. 
 
 ## Roadmap
