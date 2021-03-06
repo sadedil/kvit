@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Consul;
 using Spectre.Console;
 using DiffPlex.DiffBuilder;
-using DiffPlex.DiffBuilder.Model;
 using Kvit.Extensions;
 
 namespace Kvit.Commands
@@ -17,6 +16,12 @@ namespace Kvit.Commands
     {
         protected override string CommandAlias => "d";
         protected override string CommandDescription => "Show the differences between Consul KV directory and file system";
+
+        internal const string FileContentsAreEqualSign = "==";
+        internal const string FileContentsAreDifferentSign = "xx";
+        internal const string OnlyInFileSystemSign = "<<";
+        internal const string OnlyInConsulSign = "<<";
+
         public DiffCommand() : base("diff")
         {
             AddOption(new Option<Uri>("--address")
@@ -29,52 +34,38 @@ namespace Kvit.Commands
                 Description = "Consul Token like P@ssW0rd",
             });
 
-            AddOption(new Option<string>("--file")
+            AddOption(new Option("--all")
             {
-                Description = "Compares the contents of all files",
+                Description = "List all differences, including identical files",
             });
 
-            Handler = CommandHandler.Create<Uri, string, string>(ExecuteAsync);
+            Handler = CommandHandler.Create<Uri, string, bool>(ExecuteAsync);
         }
 
-        private async Task<int> ExecuteAsync(Uri address, string token, string file)
+        private async Task<int> ExecuteAsync(Uri address, string token, bool all)
         {
             using var client = ConsulHelper.CreateConsulClient(address, token);
-            Console.WriteLine($"Diff started. Address: {client?.Config?.Address}");
+            Console.WriteLine($"Diff started. Address: {client.Config?.Address}");
 
-            if (file == null)
-            {
-                return await CompareFiles(client);
-            }
-            else
-            {
-                try
-                {
-                    var pair = await client.KV.Get(file);
-                    return await CompareFileContents(pair.Response);
-                }
-                catch (Exception ex)
-                {
-                    await Console.Error.WriteLineAsync($"Cannot get keys. Error: {ex.Message}");
-                    return 1;
-                }
-            }
+            return await CompareFiles(client, includeIdenticalResults: all);
         }
 
-        private async Task<int> CompareFiles(ConsulClient client)
+        private static async Task<int> CompareFiles(ConsulClient client, bool includeIdenticalResults)
         {
             var nonFolderPairs = await Common.GetNonFolderPairsAsync(client);
             if (nonFolderPairs == null)
             {
                 return 1;
             }
+
             var localFiles = Common.GetLocalFiles();
             localFiles = localFiles.Select(f => Path.GetRelativePath(Common.BaseDirectoryFullPath, f).ToUnixPath()).ToList();
-            
+
             var table = new Table();
-            table.BorderColor(Color.Blue);
-            table.AddColumn(new TableColumn(("Files").Colorize("blue"))); 
-            table.AddColumn(new TableColumn(("Consul - Local").Colorize("blue")).Centered());
+            table.HorizontalBorder();
+            table.BorderColor(Color.Grey74);
+            table.AddColumn(new TableColumn("Files".ToSilver(isBold: true)));
+            table.AddColumn(new TableColumn("Consul - Local".ToSilver(isBold: true)).Centered());
 
             var commonPairs = nonFolderPairs.Where(p => localFiles.Contains(p.Key));
             var consulFiles = nonFolderPairs.Select(p => p.Key);
@@ -85,104 +76,37 @@ namespace Kvit.Commands
             {
                 exitCode = 2;
             }
-            
+
             foreach (var pair in commonPairs)
             {
                 var filePath = Path.Combine(Common.BaseDirectoryFullPath, pair.Key);
                 var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
-                var consulContent = Encoding.UTF8.GetString(pair.Value ?? new byte[]{});
+                var consulContent = Encoding.UTF8.GetString(pair.Value ?? new byte[] { });
                 var diffModel = InlineDiffBuilder.Diff(consulContent, fileContent);
-                string resultColumn;
+
                 if (diffModel.HasDifferences)
                 {
                     exitCode = 2;
-                    resultColumn = ("xx").Colorize("red");
+                    table.AddRow(pair.Key.ToRed(), FileContentsAreDifferentSign.ToRed());
                 }
-                else
+                else if (includeIdenticalResults)
                 {
-                    resultColumn = ("==").Colorize("green");
+                    table.AddRow(pair.Key.ToSilver(), FileContentsAreEqualSign.ToSilver());
                 }
-                
-                table.AddRow(pair.Key.Colorize("yellow"), resultColumn);
             }
+
             foreach (var file in missingFilesOnConsul)
             {
-                table.AddRow(file.Colorize("yellow"), ("<<").Colorize("blue"));
+                table.AddRow(file.ToYellow(), OnlyInFileSystemSign.ToYellow());
             }
+
             foreach (var file in missingFilesOnFileSystem)
             {
-                table.AddRow(file.Colorize("yellow"), (">>").Colorize("blue"));
+                table.AddRow(file.ToYellow(), OnlyInConsulSign.ToYellow());
             }
 
             AnsiConsole.Render(table);
             return exitCode;
-        }
-
-        private async Task<int> CompareFileContents(KVPair pair)
-        {
-            var filePath = Path.Combine(Common.BaseDirectoryFullPath, pair.Key);
-            if (!File.Exists(filePath))
-            {
-                await Console.Error.WriteLineAsync($"File not exist.");
-                return 1;
-            }
-
-            var table = new Table();
-            table.BorderColor(Color.Blue);
-            table.AddColumn(new TableColumn(("Consul").Colorize("blue"))); 
-            table.AddColumn(new TableColumn(("Local").Colorize("blue")));
-            
-            var fileContent = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
-            var consulContent = Encoding.UTF8.GetString(pair.Value ?? Array.Empty<byte>());
-            var diffModel = SideBySideDiffBuilder.Diff(consulContent, fileContent);
-            
-            var oldLines = diffModel.OldText.Lines;
-            var newLines = diffModel.NewText.Lines;
-            var maxRow = Math.Max(newLines.Count, oldLines.Count);
-            
-            for (var i = 0; i < maxRow; i++)
-            {
-                var oldLine = oldLines[i];
-                var oldDiffPosition = oldLine.Position.HasValue ? oldLine.Position.Value.ToString() : "  ";
-                var oldDiffRow = GenerateDiff(oldLine);
-                oldDiffRow = $"{oldDiffPosition.Colorize("yellow")} {oldDiffRow}";
-            
-                var newLine = newLines[i];
-                var newDiffPosition = newLine.Position.HasValue ? newLine.Position.Value.ToString() : "  ";
-                var newDiffRow = GenerateDiff(newLine);
-                newDiffRow = $"{newDiffPosition.Colorize("yellow")} {newDiffRow}";
-
-                table.AddRow(oldDiffRow, newDiffRow);
-            }
-
-            AnsiConsole.Render(table);
-            if (diffModel.NewText.HasDifferences || diffModel.OldText.HasDifferences)
-            {
-                return 2;
-            }
-            return 0;
-        }
-
-        private string GenerateDiff(DiffPiece diffPiece)
-        {
-            var diffRow = string.Empty;
-            switch (diffPiece.Type)
-            {
-                case ChangeType.Deleted:
-                    diffRow = diffPiece.Text.Colorize("red");
-                    break;
-                case ChangeType.Inserted:
-                    diffRow = diffPiece.Text.Colorize("green");
-                    break;
-                case ChangeType.Modified:
-                    diffRow = diffPiece.SubPieces.Aggregate(diffRow, (current, subPiece) => $"{current}{GenerateDiff(subPiece)}");
-                    break;
-                case ChangeType.Unchanged:
-                    diffRow = diffPiece.Text.Colorize("blue");
-                    break;
-            }
-
-            return diffRow;
         }
     }
 }

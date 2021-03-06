@@ -16,6 +16,7 @@ namespace Kvit
             rootCommand.AddCommand(new FetchCommand());
             rootCommand.AddCommand(new PushCommand());
             rootCommand.AddCommand(new DiffCommand());
+            rootCommand.AddCommand(new CompareCommand());
 
             return rootCommand.InvokeAsync(args);
         }

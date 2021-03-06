@@ -2,11 +2,13 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Kvit.IntegrationTests.TestHelpers
 {
-    internal static class ProcessHelper
+    internal static class ProcessTestHelper
     {
+        private static readonly Regex _ansiEscapeCodeRegex = new(@"\e\[(\d+;)*(\d+)?[ABCDHJKfmsu]", RegexOptions.Compiled);
         private const string KvitProjectPathRelativeToUnitTestDirectory = "../../../../../src/Kvit";
         internal const string TestConsulUrl = "http://localhost:8900";
 
@@ -33,8 +35,6 @@ namespace Kvit.IntegrationTests.TestHelpers
         /// <returns></returns>
         private static (string stdout, string stderr, int exitCode) RunKvitWithBaseDirEnvironmentVariable(string baseDir, string args)
         {
-            //var baseDir = CreateRandomBaseDir();
-
             var process = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -54,7 +54,7 @@ namespace Kvit.IntegrationTests.TestHelpers
                 }
             };
             process.Start();
-            
+
             var stdout = process.StandardOutput.ReadToEnd();
             var stderr = process.StandardError.ReadToEnd();
             process.WaitForExit();
@@ -117,6 +117,12 @@ namespace Kvit.IntegrationTests.TestHelpers
             };
             process.Start();
             process.WaitForExit();
+        }
+
+
+        internal static string StripAnsiEscapeCodes(string input)
+        {
+            return _ansiEscapeCodeRegex.Replace(input, string.Empty);
         }
     }
 }

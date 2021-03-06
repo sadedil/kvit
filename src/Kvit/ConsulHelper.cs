@@ -1,10 +1,12 @@
 using System;
 using Consul;
+using JetBrains.Annotations;
 
 namespace Kvit
 {
     public static class ConsulHelper
     {
+        [NotNull]
         public static ConsulClient CreateConsulClient(Uri address, string token)
         {
             var addressFromEnvironment = Environment.GetEnvironmentVariable(EnvironmentVariables.KVIT_ADDRESS);

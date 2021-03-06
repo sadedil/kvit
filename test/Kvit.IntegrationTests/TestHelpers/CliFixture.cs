@@ -10,7 +10,7 @@ namespace Kvit.IntegrationTests.TestHelpers
         {
             // Let's build our real app once
             // Then we can use like "dotnet run --no-build"
-            ProcessHelper.BuildKvit();
+            ProcessTestHelper.BuildKvit();
         }
 
         public void Dispose()
