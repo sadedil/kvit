@@ -28,16 +28,19 @@ After the install, you can easily execute by typing `kvit` to your favorite term
 
 ### TL;DR
 
-- Use `kvit fetch` and download all key values to current folder
+- Use `kvit fetch` and download all keys and values to current folder
 - Edit this files or add new ones with your favorite text editor
+- Optionally use `kvit diff` to see which files are changed
+- Optionally use `kvit compare <file>` to see which part of your content is different between file system and consul
 - Then use `kvit push` to upload all to your Consul server
+
+> Most kvit commands requires this two parameters: `address` and `token`
+> - If you omit `address` then tries to connect ``http://localhost:8500``
+> - If you omit `token` then tries to connect without authentication.
 
 ### `kvit fetch`
 
 Downloads your key/value pairs from your Consul server, and writes all into the current directory.
-
-- If you omit `address` then tries to connect ``http://localhost:8500``
-- If you omit `token` then tries to connect without authentication.
 
 ```
 kvit fetch [--address <address>] [--token <token>]
@@ -49,23 +52,27 @@ Uploads your key/value pairs from current directory to your Consul server.
 
 >Currently kvit not supports deletion of key value pairs (This feature is in our roadmap)
 
-- If you omit `address` then tries to connect ``http://localhost:8500``
-- If you omit `token` then tries to connect without authentication.
-
 ```
 kvit push [--address <address>] [--token <token>]
 ```
 
 ### `kvit diff`
 
-Compares keys between Consul server and current directory.
+Compares keys between Consul and current directory and prints a summary.
 
-- If you omit `address` then tries to connect ``http://localhost:8500``
-- If you omit `token` then tries to connect without authentication.
-- If you pass `file` then compares the file contents.
+- If you add `--all` option, it displays all files in directory, otherwise only display different or missing ones. 
+```
+kvit diff [--address <address>] [--token <token>] [--all]
+```
+
+### `kvit compare`
+
+Compares the content of key between Consul and file system.
+
+- `<file>` is a required parameter. You should use the relative path of your current directory. For example `kvit compare folder1/file1`.  
 
 ```
-kvit diff [--address <address>] [--token <token>] [--file <file>]
+kvit compare [--address <address>] [--token <token>] <file>
 ```
 
 ## How to build & test and run on your computer?

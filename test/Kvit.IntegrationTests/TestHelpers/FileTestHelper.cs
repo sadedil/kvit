@@ -3,9 +3,9 @@ using System.Text;
 
 namespace Kvit.IntegrationTests.TestHelpers
 {
-    internal static class FileHelper
+    internal static class FileTestHelper
     {
-        public static readonly Encoding TestEncoding = Encoding.UTF8;
+        private static readonly Encoding TestEncoding = Encoding.UTF8;
 
         public static void WriteAllText(string filePath, string contents)
         {

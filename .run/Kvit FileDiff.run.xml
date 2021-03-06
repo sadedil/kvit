@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Kvit Push" type="DotNetProject" factoryName=".NET Project">
+  <configuration default="false" name="Kvit FileDiff" type="DotNetProject" factoryName=".NET Project">
     <option name="EXE_PATH" value="$PROJECT_DIR$/src/Kvit/bin/Debug/net5.0/kvit.dll" />
-    <option name="PROGRAM_PARAMETERS" value="push" />
+    <option name="PROGRAM_PARAMETERS" value="filediff asd" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/Kvit/bin/Debug/net5.0" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <envs>

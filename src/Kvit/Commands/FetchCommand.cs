@@ -32,7 +32,7 @@ namespace Kvit.Commands
         private async Task<int> ExecuteAsync(Uri address, string token)
         {
             using var client = ConsulHelper.CreateConsulClient(address, token);
-            Console.WriteLine($"Fetch started. Address: {client?.Config?.Address}");
+            Console.WriteLine($"Fetch started. Address: {client.Config?.Address}");
 
             var nonFolderPairs = await Common.GetNonFolderPairsAsync(client);
 
@@ -80,17 +80,15 @@ namespace Kvit.Commands
                 Console.WriteLine("All keys successfully fetched.");
                 return 0;
             }
-            else
-            {
-                var unSuccessfulResults = fetchResults.Where(fr => !fr.IsSucceeded).ToList();
-                await Console.Error.WriteLineAsync($"{unSuccessfulResults.Count} / {fetchResults.Count} key(s) cannot be fetched");
-                foreach (var fetchResult in unSuccessfulResults)
-                {
-                    await Console.Error.WriteLineAsync($"{fetchResult.Key}: {fetchResult.ErrorMessage}");
-                }
 
-                return 1;
+            var unSuccessfulResults = fetchResults.Where(fr => !fr.IsSucceeded).ToList();
+            await Console.Error.WriteLineAsync($"{unSuccessfulResults.Count} / {fetchResults.Count} key(s) cannot be fetched");
+            foreach (var fetchResult in unSuccessfulResults)
+            {
+                await Console.Error.WriteLineAsync($"{fetchResult.Key}: {fetchResult.ErrorMessage}");
             }
+
+            return 1;
         }
 
         private class FetchResult

@@ -13,9 +13,11 @@ namespace Kvit
         public const int ConsulTransactionMaximumOperationCount = 64;
         public static readonly Uri DefaultConsulUri = new Uri("http://localhost:8500");
 
-        public static readonly string BaseDirectory = null; // Will be filled in static constructor
-        public static readonly string BaseDirectoryFullPath = null; // Will be filled in static constructor
-        private static readonly string DotKvitDirectoryFullPath = null; // Will be filled in static constructor
+        public static readonly string BaseDirectory; // Will be filled in static constructor
+        public static readonly string BaseDirectoryFullPath; // Will be filled in static constructor
+        private static readonly string DotKvitDirectoryFullPath; // Will be filled in static constructor
+
+        private static readonly string[] _ignoredFiles = {".DS_Store", "desktop.ini"};
 
         static Common()
         {
@@ -46,11 +48,10 @@ namespace Kvit
         public static List<string> GetLocalFiles()
         {
             return Directory
-                .GetFiles(Common.BaseDirectory, "*.*", SearchOption.AllDirectories)
+                .GetFiles(BaseDirectory, "*.*", SearchOption.AllDirectories)
                 .Select(f => f.ToUnixPath())
                 .Where(f => !f.StartsWith(DotKvitDirectoryFullPath))
-                .Where(f => f != ".DS_Store")
-                .Where(f => f != "desktop.ini")
+                .Where(f => !_ignoredFiles.Any(i => string.Equals(Path.GetFileName(f), i, StringComparison.InvariantCultureIgnoreCase)))
                 .ToList();
         }
     }
