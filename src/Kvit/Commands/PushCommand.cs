@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Consul;
@@ -52,12 +53,27 @@ namespace Kvit.Commands
             }
 
             Console.WriteLine($"{txnOps.Count} key(s) prepared. Trying to push...");
+
             foreach (var txnOpsChunk in txnOps.ChunkBy(Common.ConsulTransactionMaximumOperationCount))
             {
-                await client.KV.Txn(txnOpsChunk);
+                var pushResponse = await client.KV.Txn(txnOpsChunk);
+
+                if (pushResponse.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    Console.WriteLine($"{pushResponse.Response.Results.Count} key(s) pushed.");
+                }
+                else
+                {
+                    Console.WriteLine($"{pushResponse.Response.Results.Count} key(s) pushed. ");
+                    Console.WriteLine($"{pushResponse.Response.Errors.Count} key(s) couldn't be pushed due to errors: ");
+
+                    foreach (var errorMessage in pushResponse.Response.Errors.Select(x => x.What).Distinct())
+                    {
+                        Console.WriteLine($"{errorMessage}");
+                    }
+                }
             }
 
-            Console.WriteLine($"{txnOps.Count} key(s) pushed.");
             return 0;
         }
     }
