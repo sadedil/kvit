@@ -22,7 +22,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Consul" Version="1.6.1.1" />
+    <PackageReference Include="Consul" Version="1.6.10.7" />
     <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
     <PackageReference Include="Spectre.Console" Version="0.44.0" />
     <PackageReference Include="Spectre.Console.Extensions.Table" Version="0.3.0" />
