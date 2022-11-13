@@ -1,9 +1,5 @@
 name: Build & Test & Pack
 
-runs:
-  using: 'node16'
-  main: 'main.js'
-
 on:
   push:
     branches: [ main ]
@@ -25,12 +21,12 @@ jobs:
     steps:
 
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3.1.0
       with:
         fetch-depth: 0
 
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3.0.3
       with:
         dotnet-version: '7.0.x'
 
