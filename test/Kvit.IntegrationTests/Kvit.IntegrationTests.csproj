@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -25,5 +25,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Kvit\Kvit.csproj" />
   </ItemGroup>
-  
+
 </Project>
