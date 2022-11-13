@@ -22,7 +22,7 @@ namespace Kvit.IntegrationTests
 
             var baseDir = ProcessTestHelper.CreateRandomBaseDir();
 
-            // missingFilesOnConsul
+            // Populate the file system
             FileTestHelper.WriteAllText(Path.Combine(baseDir, "file"), @"""text""");
             FileTestHelper.WriteAllText(Path.Combine(baseDir, "folder1", "file2"), @"{""myNameIsFile2"": ""yes""}");
             FileTestHelper.WriteAllText(Path.Combine(baseDir, "folder1", "folder1.1", "file3"), @"{""iaminasubfolder"": ""absolutely""}");
@@ -30,7 +30,7 @@ namespace Kvit.IntegrationTests
             FileTestHelper.WriteAllText(Path.Combine(baseDir, "key1"), @"""value""");
             FileTestHelper.WriteAllText(Path.Combine(baseDir, "folder1", "file1"), "true");
 
-            // missingFilesOnFileSystem
+            // Populate the Consul instance
             await ConsulTestHelper.AddDirectoryToConsulAsync("dir1");
             await ConsulTestHelper.AddDataToConsulAsync("file0", "555");
             await ConsulTestHelper.AddDataToConsulAsync("key1", "value1");
@@ -63,27 +63,27 @@ namespace Kvit.IntegrationTests
             );
             stdoutLines.ShouldSatisfyAllConditions(
                 () => stdoutLines[7].ShouldContain("file"),
-                () => stdoutLines[7].ShouldContain(DiffCommand.OnlyInConsulSign)
+                () => stdoutLines[7].ShouldContain(DiffCommand.OnlyInFileSystemSign)
             );
             stdoutLines.ShouldSatisfyAllConditions(
                 () => stdoutLines[8].ShouldContain("folder1/file2"),
-                () => stdoutLines[8].ShouldContain(DiffCommand.OnlyInConsulSign)
+                () => stdoutLines[8].ShouldContain(DiffCommand.OnlyInFileSystemSign)
             );
             stdoutLines.ShouldSatisfyAllConditions(
                 () => stdoutLines[9].ShouldContain("folder1/folder1.1/file3"),
-                () => stdoutLines[9].ShouldContain(DiffCommand.OnlyInConsulSign)
+                () => stdoutLines[9].ShouldContain(DiffCommand.OnlyInFileSystemSign)
             );
             stdoutLines.ShouldSatisfyAllConditions(
                 () => stdoutLines[10].ShouldContain("dir1/key1_in_dir1"),
-                () => stdoutLines[10].ShouldContain(DiffCommand.OnlyInFileSystemSign)
+                () => stdoutLines[10].ShouldContain(DiffCommand.OnlyInConsulSign)
             );
             stdoutLines.ShouldSatisfyAllConditions(
                 () => stdoutLines[11].ShouldContain("dir2/dir3/dir4/key_in_subfolder"),
-                () => stdoutLines[11].ShouldContain(DiffCommand.OnlyInFileSystemSign)
+                () => stdoutLines[11].ShouldContain(DiffCommand.OnlyInConsulSign)
             );
             stdoutLines.ShouldSatisfyAllConditions(
                 () => stdoutLines[11].ShouldContain("key"),
-                () => stdoutLines[11].ShouldContain(DiffCommand.OnlyInFileSystemSign)
+                () => stdoutLines[11].ShouldContain(DiffCommand.OnlyInConsulSign)
             );
 
             exitCode.ShouldBe(2);
