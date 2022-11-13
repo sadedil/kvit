@@ -18,7 +18,7 @@ namespace Kvit.Commands
 
         internal const string FileContentsAreEqualSign = "==";
         internal const string FileContentsAreDifferentSign = "xx";
-        internal const string OnlyInFileSystemSign = "<<";
+        internal const string OnlyInFileSystemSign = ">>";
         internal const string OnlyInConsulSign = "<<";
 
         public DiffCommand() : base("diff")
