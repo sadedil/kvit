@@ -1,13 +1,12 @@
+using Consul;
+using Kvit.Extensions;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Consul;
-using Kvit.Extensions;
 
 namespace Kvit.Commands
 {
@@ -18,16 +17,20 @@ namespace Kvit.Commands
 
         public PushCommand() : base("push")
         {
-            AddOption(new Option<Uri>("--address")
+            var addressOption = new Option<Uri>("--address")
             {
                 Description = "Consul Url like http://localhost:8500",
-            });
+            };
 
-            AddOption(new Option<string>("--token")
+            var tokenOption = new Option<string>("--token")
             {
                 Description = "Consul Token like P@ssW0rd",
-            });
-            Handler = CommandHandler.Create<Uri, string>(ExecuteAsync);
+            };
+
+            AddOption(addressOption);
+            AddOption(tokenOption);
+
+            this.SetHandler(ExecuteAsync, addressOption, tokenOption);
         }
 
         private async Task<int> ExecuteAsync(Uri address, string token)

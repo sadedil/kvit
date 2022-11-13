@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Kvit": {
+      "commandName": "Project"
+    },
+    "Kvit Help": {
+      "commandName": "Project",
+      "commandLineArgs": "--help"
+    }
+  }
+}

@@ -1,15 +1,14 @@
+using Consul;
+using DiffPlex.DiffBuilder;
+using DiffPlex.DiffBuilder.Model;
+using Kvit.Extensions;
+using Spectre.Console;
 using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Consul;
-using Spectre.Console;
-using DiffPlex.DiffBuilder;
-using DiffPlex.DiffBuilder.Model;
-using Kvit.Extensions;
 
 namespace Kvit.Commands
 {
@@ -20,23 +19,27 @@ namespace Kvit.Commands
 
         public CompareCommand() : base("compare")
         {
-            AddOption(new Option<Uri>("--address")
+            var addressOption = new Option<Uri>("--address")
             {
-                Description = "Consul Url like http://localhost:8500"
-            });
+                Description = "Consul Url like http://localhost:8500",
+            };
 
-            AddOption(new Option<string>("--token")
+            var tokenOption = new Option<string>("--token")
             {
-                Description = "Consul Token like P@ssW0rd"
-            });
+                Description = "Consul Token like P@ssW0rd",
+            };
 
-            AddArgument(new Argument("file")
+            var fileArgument = new Argument<string>("file")
             {
                 Description = "File name to compare",
                 Arity = new ArgumentArity(1, 1)
-            });
+            };
 
-            Handler = CommandHandler.Create<Uri, string, string>(ExecuteAsync);
+            AddOption(addressOption);
+            AddOption(tokenOption);
+            AddArgument(fileArgument);
+
+            this.SetHandler(ExecuteAsync, addressOption, tokenOption, fileArgument);
         }
 
         private async Task<int> ExecuteAsync(Uri address, string token, string file)
@@ -101,7 +104,7 @@ namespace Kvit.Commands
                 table.AddRow(oldDiffRow, newDiffRow);
             }
 
-            AnsiConsole.Render(table);
+            AnsiConsole.Write(table);
             if (diffModel.NewText.HasDifferences || diffModel.OldText.HasDifferences)
             {
                 return 2;
