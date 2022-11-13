@@ -17,7 +17,7 @@ namespace Kvit.IntegrationTests
             var (stdout, stderr, exitCode) = ProcessTestHelper.RunKvit(runWithBaseDir, baseDir, "--help");
 
             // Assert
-            stdout.ShouldContain("Kvit:");
+            stdout.ShouldContain("Description:");
             stdout.ShouldContain("Usage:");
             stdout.ShouldContain("Options:");
             stdout.ShouldContain("Commands:");

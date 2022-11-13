@@ -1,14 +1,13 @@
+using Consul;
+using DiffPlex.DiffBuilder;
+using Kvit.Extensions;
+using Spectre.Console;
 using System;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Consul;
-using Spectre.Console;
-using DiffPlex.DiffBuilder;
-using Kvit.Extensions;
 
 namespace Kvit.Commands
 {
@@ -24,22 +23,27 @@ namespace Kvit.Commands
 
         public DiffCommand() : base("diff")
         {
-            AddOption(new Option<Uri>("--address")
+            var addressOption = new Option<Uri>("--address")
             {
                 Description = "Consul Url like http://localhost:8500",
-            });
+            };
 
-            AddOption(new Option<string>("--token")
+            var tokenOption = new Option<string>("--token")
             {
                 Description = "Consul Token like P@ssW0rd",
-            });
+            };
 
-            AddOption(new Option("--all")
+            var allOption = new Option<bool>("--all")
             {
                 Description = "List all differences, including identical files",
-            });
+            };
 
-            Handler = CommandHandler.Create<Uri, string, bool>(ExecuteAsync);
+            AddOption(addressOption);
+            AddOption(tokenOption);
+            AddOption(allOption);
+
+            this.SetHandler<Uri, string, bool>(ExecuteAsync, addressOption, tokenOption, allOption);
+            //Handler = CommandHandler.Create<Uri, string, bool>(ExecuteAsync);
         }
 
         private async Task<int> ExecuteAsync(Uri address, string token, bool all)
@@ -105,7 +109,7 @@ namespace Kvit.Commands
                 table.AddRow(file.ToYellow(), OnlyInConsulSign.ToYellow());
             }
 
-            AnsiConsole.Render(table);
+            AnsiConsole.Write(table);
             return exitCode;
         }
     }

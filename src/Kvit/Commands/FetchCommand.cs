@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
-using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,17 +15,20 @@ namespace Kvit.Commands
 
         public FetchCommand() : base("fetch")
         {
-            AddOption(new Option<Uri>("--address")
+            var addressOption = new Option<Uri>("--address")
             {
                 Description = "Consul Url like http://localhost:8500",
-            });
+            };
 
-            AddOption(new Option<string>("--token")
+            var tokenOption = new Option<string>("--token")
             {
                 Description = "Consul Token like P@ssW0rd",
-            });
+            };
 
-            Handler = CommandHandler.Create<Uri, string>(ExecuteAsync);
+            AddOption(addressOption);
+            AddOption(tokenOption);
+
+            this.SetHandler(ExecuteAsync, addressOption, tokenOption);
         }
 
         private async Task<int> ExecuteAsync(Uri address, string token)

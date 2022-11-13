@@ -1,8 +1,8 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <AssemblyName>kvit</AssemblyName>
 
     <PackAsTool>true</PackAsTool>
@@ -24,10 +24,14 @@
   <ItemGroup>
     <PackageReference Include="Consul" Version="1.6.10.7" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
-    <PackageReference Include="Spectre.Console" Version="0.44.0" />
+    <PackageReference Include="Spectre.Console" Version="0.45.0" />
     <PackageReference Include="Spectre.Console.Extensions.Table" Version="1.0.0" />
-    <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Include="DiffPlex" Version="1.7.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.5.119" />
   </ItemGroup>
 
 </Project>
