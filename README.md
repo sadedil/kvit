@@ -11,9 +11,9 @@
 
 ## How to install?
 
-> .NET 5 runtime is a prerequisite. And can be downloaded from [here](https://dotnet.microsoft.com/download).
+> .NET 7 runtime is a prerequisite. And can be downloaded from [here](https://dotnet.microsoft.com/download).
 > 
-**Kvit** developed as a cross platform console app with *.NET 5.* You can easily install as a global cli tool.
+**Kvit** developed as a cross platform console app with *.NET 7.* You can easily install as a global cli tool.
 
 ```bash
 # Install if not installed, update to the last version if already installed
